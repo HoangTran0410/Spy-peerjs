@@ -4,6 +4,7 @@ import { Toast } from "../utils.js";
 window.onload = async () => {
   var localStream = null,
     peer = null,
+    calls = {},
     totalSpy = 0,
     userName = localStorage.getItem("spy-target-name") || "";
 
@@ -126,8 +127,11 @@ window.onload = async () => {
         console.log("Received data: ", data);
 
         if (data == "endcall") {
+          calls[conn.peer]?.close();
+          delete calls[conn.peer];
           conn.close();
           totalSpy--;
+
           Toast.fire({
             icon: "info",
             title: "Có người thoát",
@@ -143,6 +147,7 @@ window.onload = async () => {
 
     peer.on("call", function (call) {
       call.answer(localStream); // Answer the call with an A/V stream.
+      calls[call.peer] = call;
     });
 
     peer.on("disconnected", function () {
