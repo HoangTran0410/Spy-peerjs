@@ -1,5 +1,5 @@
 // https://github.com/peers/peerjs/issues/158#issuecomment-614779167
-const createMediaStreamFake = () => {
+export const createMediaStreamFake = () => {
   return new MediaStream([
     createEmptyAudioTrack(),
     createEmptyVideoTrack({
@@ -34,3 +34,15 @@ const createEmptyVideoTrack = ({ width, height }) => {
     enabled: false,
   });
 };
+
+export const Toast = Swal.mixin({
+  toast: true,
+  position: "top-end",
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  didOpen: (toast) => {
+    toast.addEventListener("mouseenter", Swal.stopTimer);
+    toast.addEventListener("mouseleave", Swal.resumeTimer);
+  },
+});

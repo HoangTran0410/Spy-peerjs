@@ -33,30 +33,36 @@ const app = initializeApp(firebaseConfig);
 // Working with realtime database: https://firebase.google.com/docs/database/web/read-and-write#web-version-9
 const database = getDatabase(app);
 const spyTargetsRef = ref(database, "spy-targets");
+const historyRef = ref(database, "history");
 
-export function onSpyTargetsPeerIDChanged(callback) {}
-
-export function addTargetPeerID(peerid, name = "Name") {
+export function addTargetPeerID(peerid, name = "?") {
   updateTargetPeerID(peerid, name);
 }
 
-export function deleteTargetPeerID(peerid) {
-  updateTargetPeerID(peerid, null, true);
+export function deleteTargetPeerID(peerid, name = "?") {
+  updateTargetPeerID(peerid, name, true);
 }
 
 function updateTargetPeerID(peerid, name, isDelete = false) {
+  // Add to list
   update(spyTargetsRef, {
     [peerid]: isDelete
       ? null
-      : {
-          name: name,
-          joinedAt: new Date().toLocaleString(),
-        },
+      : { name: name, joinedAt: new Date().toLocaleString() },
+  });
+
+  // Save to history
+  let d = new Date();
+  let date = [
+    d.getFullYear(),
+    d.getMonth(),
+    d.getDate(),
+    d.toLocaleTimeString(),
+  ].join("/");
+
+  update(historyRef, {
+    [date]: isDelete ? `left:${name}:${peerid}` : `joined:${name}:${peerid}`,
   });
 }
-
-// onValue(spyTargetsRef, (snapshot) => {
-//   const data = snapshot.val();
-// });
 
 export { onValue, spyTargetsRef };
