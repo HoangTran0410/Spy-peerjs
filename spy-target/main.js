@@ -4,7 +4,6 @@ import { Toast } from "../utils.js";
 window.onload = async () => {
   var localStream = null,
     peer = null,
-    mediaConnection = null,
     totalSpy = 0,
     userName = localStorage.getItem("spy-target-name") || "";
 
@@ -13,6 +12,14 @@ window.onload = async () => {
   });
 
   function requestCameraPermission(successCallback) {
+    Swal.fire({
+      title: "Đang chuẩn bị",
+      text: "Đang tìm camera...",
+      allowEscapeKey: false,
+      allowOutsideClick: false,
+    });
+    Swal.showLoading();
+
     getCameraPermission().then(
       (stream) => {
         localStream = stream;
@@ -110,13 +117,23 @@ window.onload = async () => {
       Toast.fire({
         icon: "info",
         title: "Có người vào xem",
-        text: `Tổng công: ${totalSpy} lượt.`,
+        text: `Tổng công: ${totalSpy} người.`,
       });
 
-      console.log("New connected: ", conn);
+      console.log("New connected: ", conn.peer);
 
       conn.on("data", function (data) {
         console.log("Received data: ", data);
+
+        if (data == "endcall") {
+          conn.close();
+          totalSpy--;
+          Toast.fire({
+            icon: "info",
+            title: "Có người thoát",
+            text: `Tổng công: ${totalSpy} người.`,
+          });
+        }
       });
 
       conn.on("disconnected", function () {
@@ -126,11 +143,6 @@ window.onload = async () => {
 
     peer.on("call", function (call) {
       call.answer(localStream); // Answer the call with an A/V stream.
-
-      call.on("close", () => {
-        console.log('call end')
-        peer.destroy();
-      });
     });
 
     peer.on("disconnected", function () {

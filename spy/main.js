@@ -36,10 +36,7 @@ window.onload = () => {
 
   function endCall() {
     if (currentPeer) {
-      currentPeer.close();
-    }
-    if (currentCall) {
-      currentCall.close();
+      currentPeer.send("endcall");
     }
 
     currentCall = null;
