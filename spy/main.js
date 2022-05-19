@@ -13,7 +13,7 @@ window.onload = () => {
 
     Swal.fire({
       icon: "info",
-      title: `Đang gọi ${name}...`,
+      title: `Đang kết nối tới '${name}'...`,
       showCancelButton: true,
       cancelButtonText: "Hủy",
       allowOutsideClick: false,
@@ -55,7 +55,7 @@ window.onload = () => {
           .map(
             (peerid) => `<li>
                     ${data[peerid].name} (${data[peerid].joinedAt})
-                    <button onclick="call('${peerid}', '${data[peerid].name}')">Call</button>
+                    <button onclick="call('${peerid}', '${data[peerid].name}')">Xem</button>
                 </li>`
           )
           .join("")
