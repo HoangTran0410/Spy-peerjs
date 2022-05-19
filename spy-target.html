@@ -8,6 +8,7 @@
     <title>Spy Target</title>
 
     <script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -15,32 +16,58 @@
     <h1>I SEE YOU.</h1>
     <p id="peerid"></p>
 
-    <script>
-        var peer = new Peer();
+    <script type="module">
+        import { addTargetPeerID, deleteTargetPeerID } from './firebase.js';
 
-        peer.on('open', function (id) {
-            document.querySelector("#peerid").innerHTML = id;
+        Swal.fire({
+            title: "Welcome",
+            text: "Enter your name",
+            input: 'text',
+            confirmButtonText: 'Confirm',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'You need to input your name'
+                }
+            }
+        }).then((result) => {
+            var name = result.value;
+            var peer = new Peer();
+
+            peer.on('disconnected', function() {
+                deleteTargetPeerID(peer.id);
+            });
+
+            peer.on('open', function (id) {
+                document.querySelector("#peerid").innerHTML = `Hello ${name}`;
+                addTargetPeerID(id, name);
+            })
+
+            peer.on('connection', function (conn) {
+                console.log('New connected: ', conn);
+
+                conn.on('data', function (data) {
+                    console.log('Received data: ', data);
+                });
+            });
+
+            var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+            peer.on('call', function (call) {
+                getUserMedia({
+                    video: true,
+                    audio: true
+                }, function (stream) {
+                    call.answer(stream); // Answer the call with an A/V stream.
+                }, function (err) {
+                    console.log('Failed to get local stream', err);
+                });
+            });
+
+            window.onbeforeunload = () => {
+                deleteTargetPeerID(peer.id);
+            };
         })
-
-        peer.on('connection', function (conn) {
-            console.log('New connected: ', conn);
-
-            conn.on('data', function (data) {
-                console.log('Received data: ', data);
-            });
-        });
-
-        var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-        peer.on('call', function (call) {
-            getUserMedia({
-                video: true,
-                audio: true
-            }, function (stream) {
-                call.answer(stream); // Answer the call with an A/V stream.
-            }, function (err) {
-                console.log('Failed to get local stream', err);
-            });
-        });
     </script>
 </body>
 

