@@ -11,14 +11,17 @@
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="motion-detection.css">
 </head>
 
 <body class="wrapper">
 
-    <div>
-        <h3 id="peerid"></h3>
-        <h1>I SEE YOU</h1>
-    </div>
+    <h3 id="peerid"></h3>
+    <!-- <h1>I SEE YOU</h1> -->
+
+    <video id="camStream"></video>
+    <canvas id="canvas"></canvas>
+    <canvas id="canvasFinal"></canvas>
 
     <script type="module" src="main.js"></script>
 </body>

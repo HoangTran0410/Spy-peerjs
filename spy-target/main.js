@@ -1,4 +1,5 @@
 import { addTargetPeerID, deleteTargetPeerID } from "../firebase.js";
+import { MotionDetector } from "./motion-detection.js";
 import { Toast } from "../utils.js";
 
 window.onload = async () => {
@@ -106,6 +107,7 @@ window.onload = async () => {
 
       document.querySelector("#peerid").innerHTML = `Hello ${userName}`;
       addTargetPeerID(id, userName);
+      MotionDetector(localStream);
 
       window.onbeforeunload = function () {
         deleteTargetPeerID(peer.id, userName);
